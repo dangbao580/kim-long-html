@@ -34,9 +34,6 @@
         .secondary { color:var(--ink); background:var(--mint); }
         .danger { color:#a63f2a; background:#fde8e2; }
         .status { min-height:20px; margin-top:15px; color:var(--muted); font-size:13px; line-height:1.45; }
-        .config { margin-bottom:22px; padding:18px; border-left:3px solid var(--coral); background:#fff4ef; }
-        .config p { margin:0 0 12px; color:var(--muted); font-size:13px; line-height:1.5; }
-        .config-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .product-row { display:grid; grid-template-columns:66px minmax(0,1fr) auto; gap:13px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }
         .product-row:first-of-type { padding-top:0; }
         .product-row:last-child { border-bottom:0; }
@@ -47,56 +44,47 @@
         .row-actions { display:flex; gap:6px; }
         .row-actions button { padding:8px 10px; font-size:12px; }
         @media(max-width:800px) { nav, main { padding-left:18px; padding-right:18px; } .layout { grid-template-columns:1fr; } .intro { display:block; } .intro nav { margin-top:15px; } }
-        @media(max-width:520px) { .config-grid { grid-template-columns:1fr; } .product-row { grid-template-columns:52px minmax(0,1fr); } .thumb { width:52px; height:52px; } .row-actions { grid-column:2; } }
+        @media(max-width:520px) { .product-row { grid-template-columns:52px minmax(0,1fr); } .thumb { width:52px; height:52px; } .row-actions { grid-column:2; } }
     </style>
 </head>
 <body>
     <header><nav><a class="brand" href="index.html">Kim Long Trading<span>Quản trị sản phẩm</span></a><a href="index.html">← Xem trang bán hàng</a></nav></header>
     <main>
-        <div class="intro"><div><h1>Kho sản phẩm</h1><p>Thêm, sửa hoặc xoá dữ liệu trên GitHub.</p></div></div>
-        <section class="config panel">
-            <p>PAT chỉ được giữ trong phiên trình duyệt hiện tại, không lưu vào repo. Hãy dùng token fine-grained có quyền <b>Contents: Read and write</b> trên đúng repo này.</p>
-            <div class="config-grid">
-                <div class="field"><label for="repo">Repository (owner/repo)</label><input id="repo" placeholder="vi-du: kimlong/shop"></div>
-                <div class="field"><label for="branch">Nhánh</label><input id="branch" value="main"></div>
-                <div class="field"><label for="token">GitHub PAT</label><input id="token" type="password" autocomplete="off" placeholder="github_pat_..."></div>
-            </div>
-            <div class="actions"><button class="primary" id="load-button">Tải dữ liệu từ GitHub</button></div>
-            <div class="status" id="status" aria-live="polite"></div>
-        </section>
+        <div class="intro"><div><h1>Kho sản phẩm</h1><p>Thêm, sửa hoặc xoá sản phẩm.</p></div></div>
         <div class="layout">
             <form class="panel" id="product-form">
                 <h2 id="form-title">Thêm sản phẩm</h2>
                 <input id="product-id" type="hidden">
-                <div class="field"><label for="image">Ảnh (URL hoặc đường dẫn trong repo)</label><input id="image" required placeholder="https://... hoặc images/snack.jpg"></div>
+                <div class="field"><label for="image">Ảnh</label><input id="image" required placeholder="https://... hoặc images/snack.jpg"></div>
                 <div class="field"><label for="name">Tên sản phẩm</label><input id="name" required></div>
                 <div class="field"><label for="category">Loại</label><input id="category" required placeholder="Bánh, Kẹo, Nước..."></div>
                 <div class="field"><label for="brand">Thương hiệu</label><input id="brand" required></div>
                 <div class="field"><label for="price">Giá tiền (VNĐ)</label><input id="price" type="number" min="0" required></div>
                 <div class="actions"><button class="primary" type="submit">Lưu sản phẩm</button><button class="secondary" type="button" id="cancel-button">Huỷ sửa</button></div>
             </form>
-            <section class="panel"><h2>Danh sách hiện tại</h2><div id="product-list">Chưa tải dữ liệu.</div></section>
+            <section class="panel"><h2>Danh sách hiện tại</h2><div class="status" id="status" aria-live="polite"></div><div id="product-list">Đang tải dữ liệu...</div></section>
         </div>
     </main>
     <script>
+        const GITHUB_REPOSITORY = 'dangbao580/kim-long-html';
+        const GITHUB_BRANCH = 'main';
+        const GITHUB_TOKEN = '11112222333';
         const state = { products: [], sha: '', editingId: null };
         const fields = ['image', 'name', 'category', 'brand', 'price'];
         const get = id => document.getElementById(id);
         const status = message => { get('status').textContent = message; };
-        const config = () => ({ repo: get('repo').value.trim(), branch: get('branch').value.trim() || 'main', token: get('token').value.trim() });
-        const headers = token => ({ Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' });
-        const apiUrl = (repo, branch) => `https://api.github.com/repos/${repo}/contents/products.json?ref=${encodeURIComponent(branch)}`;
+        const headers = () => ({ Accept: 'application/vnd.github+json', Authorization: `Bearer ${GITHUB_TOKEN}`, 'X-GitHub-Api-Version': '2022-11-28' });
+        const apiUrl = () => `https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/products.json?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
         const safe = value => String(value).replace(/[&<>"']/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' })[character]);
-        function validateConfig() { const current = config(); if (!current.repo.includes('/')) throw new Error('Nhập repository theo dạng owner/repo.'); if (!current.token) throw new Error('Nhập GitHub PAT để tiếp tục.'); return current; }
-        async function githubRequest(method, body) { const current = validateConfig(); const response = await fetch(apiUrl(current.repo, current.branch), { method, headers: headers(current.token), body: body ? JSON.stringify(body) : undefined }); const result = await response.json(); if (!response.ok) throw new Error(result.message || 'GitHub API trả về lỗi.'); return result; }
+        async function githubRequest(method, body) { const response = await fetch(apiUrl(), { method, headers: headers(), body: body ? JSON.stringify(body) : undefined }); const result = await response.json(); if (!response.ok) throw new Error(result.message || 'GitHub API trả về lỗi.'); return result; }
         async function loadProducts() { try { status('Đang tải products.json...'); const result = await githubRequest('GET'); state.sha = result.sha; state.products = JSON.parse(decodeURIComponent(escape(atob(result.content.replace(/\n/g, ''))))); renderList(); status(`Đã tải ${state.products.length} sản phẩm.`); } catch (error) { status(error.message); } }
         function renderList() { get('product-list').innerHTML = state.products.length ? state.products.map(product => `<article class="product-row"><div class="thumb" style="background-image:url('${safe(product.image)}')"></div><div><strong>${safe(product.name)}</strong><small>${safe(product.brand)} · ${safe(product.category)} · ${new Intl.NumberFormat('vi-VN').format(product.price)}đ</small></div><div class="row-actions"><button class="secondary" data-edit="${product.id}">Sửa</button><button class="danger" data-delete="${product.id}">Xoá</button></div></article>`).join('') : '<p>Chưa có sản phẩm.</p>'; }
         function resetForm() { state.editingId = null; get('product-form').reset(); get('form-title').textContent = 'Thêm sản phẩm'; }
-        async function saveProducts(message) { const current = validateConfig(); const content = btoa(unescape(encodeURIComponent(JSON.stringify(state.products, null, 2) + '\n'))); const result = await githubRequest('PUT', { message, content, sha: state.sha, branch: current.branch }); state.sha = result.content.sha; status('Đã lưu lên GitHub thành công.'); }
-        get('load-button').addEventListener('click', loadProducts);
+        async function saveProducts(message) { const content = btoa(unescape(encodeURIComponent(JSON.stringify(state.products, null, 2) + '\n'))); const result = await githubRequest('PUT', { message, content, sha: state.sha, branch: GITHUB_BRANCH }); state.sha = result.content.sha; status('Đã lưu thành công.'); }
         get('cancel-button').addEventListener('click', resetForm);
-        get('product-form').addEventListener('submit', async event => { event.preventDefault(); try { validateConfig(); const product = { id: state.editingId || Date.now(), image: get('image').value.trim(), name: get('name').value.trim(), category: get('category').value.trim(), label: get('category').value.trim(), brand: get('brand').value.trim(), price: Number(get('price').value) }; if (!product.image || !product.name || !product.category || !product.brand || !Number.isFinite(product.price)) throw new Error('Vui lòng điền đủ thông tin hợp lệ.'); const index = state.products.findIndex(item => item.id === state.editingId); if (index >= 0) state.products[index] = product; else state.products.push(product); await saveProducts(index >= 0 ? `Sửa sản phẩm: ${product.name}` : `Thêm sản phẩm: ${product.name}`); renderList(); resetForm(); } catch (error) { status(error.message); } });
+        get('product-form').addEventListener('submit', async event => { event.preventDefault(); try { const product = { id: state.editingId || Date.now(), image: get('image').value.trim(), name: get('name').value.trim(), category: get('category').value.trim(), label: get('category').value.trim(), brand: get('brand').value.trim(), price: Number(get('price').value) }; if (!product.image || !product.name || !product.category || !product.brand || !Number.isFinite(product.price)) throw new Error('Vui lòng điền đủ thông tin hợp lệ.'); const index = state.products.findIndex(item => item.id === state.editingId); if (index >= 0) state.products[index] = product; else state.products.push(product); await saveProducts(index >= 0 ? `Sửa sản phẩm: ${product.name}` : `Thêm sản phẩm: ${product.name}`); renderList(); resetForm(); } catch (error) { status(error.message); } });
         get('product-list').addEventListener('click', async event => { const id = Number(event.target.dataset.edit || event.target.dataset.delete); if (!id) return; const product = state.products.find(item => item.id === id); if (event.target.dataset.edit) { state.editingId = id; fields.forEach(field => get(field).value = product[field]); get('form-title').textContent = 'Sửa sản phẩm'; window.scrollTo({ top: 0, behavior: 'smooth' }); return; } if (!confirm(`Xoá sản phẩm “${product.name}”?`)) return; try { state.products = state.products.filter(item => item.id !== id); await saveProducts(`Xoá sản phẩm: ${product.name}`); renderList(); } catch (error) { status(error.message); } });
+        loadProducts();
     </script>
 </body>
 </html>
