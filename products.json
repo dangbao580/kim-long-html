@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Bánh que socola Pocky",
+    "category": "Bánh",
+    "label": "Bánh",
+    "brand": "Pocky",
+    "price": 32000,
+    "image": "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&w=700&q=85"
+  },
+  {
+    "id": 2,
+    "name": "Bánh bông lan kem mềm",
+    "category": "Bánh",
+    "label": "Bánh",
+    "brand": "Solite",
+    "price": 45000,
+    "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=700&q=85"
+  },
+  {
+    "id": 3,
+    "name": "Kẹo dẻo trái cây mix",
+    "category": "Kẹo",
+    "label": "Kẹo",
+    "brand": "Haribo",
+    "price": 28000,
+    "image": "https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=700&q=85"
+  },
+  {
+    "id": 4,
+    "name": "Kẹo bạc hà Cool Mint",
+    "category": "Kẹo",
+    "label": "Kẹo",
+    "brand": "Lotte",
+    "price": 18000,
+    "image": "https://images.unsplash.com/photo-1581798459219-318e76aecc7b?auto=format&fit=crop&w=700&q=85"
+  },
+  {
+    "id": 5,
+    "name": "Nước ngọt Coca-Cola lon",
+    "category": "Nước",
+    "label": "Nước",
+    "brand": "Coca-Cola",
+    "price": 12000,
+    "image": "https://images.unsplash.com/photo-1629203849820-fdd70d49c38e?auto=format&fit=crop&w=700&q=85"
+  },
+  {
+    "id": 6,
+    "name": "Trà xanh không độ",
+    "category": "Nước",
+    "label": "Nước",
+    "brand": "Tân Hiệp Phát",
+    "price": 10000,
+    "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=700&q=85"
+  },
+  {
+    "id": 7,
+    "name": "Bim bim khoai tây vị tự nhiên",
+    "category": "Bim bim",
+    "label": "Bim bim",
+    "brand": "Lay's",
+    "price": 15000,
+    "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=700&q=85"
+  },
+  {
+    "id": 8,
+    "name": "Snack bắp phô mai",
+    "category": "Bim bim",
+    "label": "Bim bim",
+    "brand": "Oishi",
+    "price": 16000,
+    "image": "https://images.unsplash.com/photo-1621447504864-d8686e12698c?auto=format&fit=crop&w=700&q=85"
+  }
+]
